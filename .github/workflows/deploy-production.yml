@@ -1,0 +1,37 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: ['main', 'production']
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy (production)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to production host via SSH and docker-compose
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: ${{ secrets.PRODUCTION_SSH_PORT }}
+          script: |
+            cd "${{ secrets.PRODUCTION_DEPLOY_PATH }}"
+            docker-compose pull || true
+            docker-compose up -d --build
+
+# Required secrets for this workflow (configure in the repo Settings > Secrets):
+# - PRODUCTION_HOST
+# - PRODUCTION_USER
+# - PRODUCTION_SSH_KEY (private key)
+# - PRODUCTION_SSH_PORT (optional, default 22)
+# - PRODUCTION_DEPLOY_PATH (path on remote where docker-compose.yml lives)
