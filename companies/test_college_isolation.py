@@ -76,7 +76,7 @@ class CollegeTenantIsolationTests(APITestCase):
         resp = self.client.post(
             "/api/v1/college/bulk-upload/", {"file": csv_file}, format="multipart"
         )
-        self.assertEqual(resp.status_code, 200, resp.data)
+        self.assertEqual(resp.status_code, 202, resp.data)
 
         new_student = StudentProfile.objects.get(enrollment_number="B001")
         self.assertEqual(new_student.college_id, self.college_b.id)

@@ -1,8 +1,10 @@
-from rest_framework.test import APITestCase
 from django.core.cache import cache
-from accounts.models import User, CompanyProfile
+from rest_framework.test import APITestCase
+
+from accounts.models import CompanyProfile, User
+from jobs.models import Application, ApplicationAuditLog, Job
 from students.models import StudentProfile
-from jobs.models import Job, Application, ApplicationAuditLog
+
 
 class JobEligibilityAndAuditTests(APITestCase):
 

@@ -33,8 +33,8 @@ class ResumeAIFeedbackTests(APITestCase):
             "/api/v1/students/resume/upload/", {"resume": pdf}, format="multipart"
         )
         self.assertEqual(resp.status_code, 200, resp.data)
-        self.assertIn("ai_feedback", resp.data)
-        self.assertTrue(len(resp.data["ai_feedback"]) > 0)
+        self.assertIn("message", resp.data)
+        self.assertIn("resume_url", resp.data)
 
         profile = StudentProfile.objects.get(user=self.user)
         self.assertTrue(len(profile.ai_feedback) > 0)
