@@ -153,14 +153,26 @@ class ApplyJobView(generics.CreateAPIView):
             from rest_framework.response import Response
 
             return Response({"error": "Complete student profile first"}, status=400)
+        
+        # 1. Profile Verification Lock Check
+        if not student.is_verified:
+            from rest_framework.response import Response
+            return Response({"error": "Profile not verified by TPO yet. You cannot apply to jobs until verified."}, status=400)
+
+        # 2. Branch Eligibility Check
+        if isinstance(job.eligibility_branch, list) and len(job.eligibility_branch) > 0:
+            student_branch = student.branch.strip().upper()
+            allowed_branches = [b.strip().upper() for b in job.eligibility_branch]
+            if student_branch not in allowed_branches:
+                from rest_framework.response import Response
+                return Response({"error": f"Branch '{student.branch}' not eligible. Allowed branches: {', '.join(job.eligibility_branch)}"}, status=400)
+
         if Application.objects.filter(student=student, job=job).exists():
             from rest_framework.response import Response
-
             return Response({"error": "Already applied"}, status=400)
         if float(student.cgpa) < float(job.min_cgpa):
             from rest_framework.response import Response
-
-            return Response({"error": "CGPA not eligible"}, status=400)
+            return Response({"error": f"CGPA {student.cgpa} is below the minimum required CGPA of {job.min_cgpa}"}, status=400)
 
         app = Application.objects.create(
             student=student,
@@ -169,9 +181,18 @@ class ApplyJobView(generics.CreateAPIView):
             resume_snapshot=student.resume.name if student.resume else "",
         )
 
+        # 3. Create Audit Log for application creation
+        from .models import ApplicationAuditLog
+        ApplicationAuditLog.objects.create(
+            application=app,
+            changed_by=request.user,
+            old_status="NONE",
+            new_status="APPLIED",
+            notes="Application submitted by student."
+        )
+
         # Trigger background task for ATS scoring
         from .tasks import calculate_ats_score_task
-
         calculate_ats_score_task.delay(str(app.id))
 
         try:
@@ -343,8 +364,23 @@ class UpdateApplicationStatusView(APIView):
                 )
             app.rejection_reason = rejection_reason
 
+        old_status = app.status
         app.status = new_status
         app.save()
+
+        # Log status change to ApplicationAuditLog
+        from .models import ApplicationAuditLog
+        notes = request.data.get("notes", "")
+        if new_status == "REJECTED" and not notes:
+            notes = f"Rejection reason: {rejection_reason}"
+        
+        ApplicationAuditLog.objects.create(
+            application=app,
+            changed_by=request.user,
+            old_status=old_status,
+            new_status=new_status,
+            notes=notes
+        )
 
         # Notify student asynchronously
         from notifications.tasks import send_status_change_notification_task

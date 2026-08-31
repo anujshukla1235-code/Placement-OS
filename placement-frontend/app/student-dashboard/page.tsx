@@ -11,7 +11,7 @@ import api from '@/lib/api';
 
 interface ApplicationSummary { count: number; }
 interface InterviewSummary { count: number; }
-interface StudentProfile { name: string; email: string; }
+interface StudentProfile { name: string; email: string; is_verified?: boolean; }
 
 // Mock data for Job Suggestions as seen in the design
 const suggestedJobs = [
@@ -70,8 +70,8 @@ export default function StudentDashboardPage() {
                 <Shield className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-sm font-bold leading-tight text-slate-900">Shukl</h1>
-                <p className="text-[10px] font-semibold text-slate-500">Placement OS</p>
+                <h1 className="text-sm font-bold leading-tight text-slate-900">Placement</h1>
+                <p className="text-[10px] font-semibold text-slate-500">OS</p>
               </div>
             </Link>
             
@@ -101,6 +101,18 @@ export default function StudentDashboardPage() {
             <LogoutButton />
           </div>
         </nav>
+
+        {/* Verification Warning Alert */}
+        {profile && !profile.is_verified && (
+          <div className="mx-auto mt-6 max-w-7xl px-4 sm:px-6 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="flex items-center gap-3 rounded-2xl bg-orange-50 border border-orange-200 p-4 text-orange-850 shadow-sm">
+              <span className="text-lg">⚠️</span>
+              <div className="text-sm font-semibold">
+                Your profile is not verified by TPO yet. You cannot apply to jobs until verified. Please upload your official marksheets to TPO to request profile lock.
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Hero Welcome Banner */}
         <div className="relative mx-auto mt-6 max-w-7xl px-4 sm:px-6">

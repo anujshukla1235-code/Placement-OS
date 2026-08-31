@@ -1,1 +1,1 @@
-Contact Us: Form will save to SupportTicket model. Email: support@shukl-placement.com
+Contact Us: Form will save to SupportTicket model. Email: support@placement.com

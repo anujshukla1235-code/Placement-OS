@@ -18,9 +18,9 @@ def send_otp_email_task(user_email, user_first_name, otp_code, purpose, expiry_m
     Sends an OTP email asynchronously.
     """
     subject_map = {
-        "REGISTER": "Welcome to Shukl Placement - Verify Email",
-        "LOGIN": "Shukl Placement - Your 2FA Code (2 min)",
-        "FORGOT_PASSWORD": "Shukl Placement - Reset Password OTP",
+        "REGISTER": "Welcome to Placement - Verify Email",
+        "LOGIN": "Placement - Your 2FA Code (2 min)",
+        "FORGOT_PASSWORD": "Placement - Reset Password OTP",
     }
     subject = subject_map.get(purpose, f"Your OTP for {purpose}")
     message = f"""Hello {user_first_name},
@@ -30,7 +30,7 @@ Your OTP for {purpose} is: {otp_code}
 Valid for {expiry_min} minutes.
 If you didn't request this, please ignore.
 
-- Shukl Placement OS
+- Placement OS
 Zero Cost | Cloud Secured | MFA Enabled
 """
 
@@ -47,8 +47,8 @@ Zero Cost | Cloud Secured | MFA Enabled
             send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
                 to=[{"email": user_email, "name": user_first_name}],
                 sender={
-                    "email": "noreply@shukl-placement.com",
-                    "name": "Shukl Placement",
+                    "email": "noreply@placement.com",
+                    "name": "Placement",
                 },
                 subject=subject,
                 text_content=message,
@@ -61,7 +61,7 @@ Zero Cost | Cloud Secured | MFA Enabled
             send_mail(
                 subject,
                 message,
-                getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@shukl-placement.com"),
+                getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@placement.com"),
                 [user_email],
                 fail_silently=False,
             )
@@ -77,7 +77,7 @@ Zero Cost | Cloud Secured | MFA Enabled
             send_mail(
                 subject,
                 message,
-                getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@shukl-placement.com"),
+                getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@placement.com"),
                 [user_email],
                 fail_silently=True,
             )

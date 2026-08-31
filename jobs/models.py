@@ -1,6 +1,6 @@
 import uuid
-
 from django.db import models
+from django.conf import settings
 
 
 class Job(models.Model):
@@ -76,3 +76,23 @@ class Application(models.Model):
 
     def __str__(self):
         return f"{self.student} - {self.job.title} - {self.status}"
+
+
+class ApplicationAuditLog(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    application = models.ForeignKey(
+        Application, on_delete=models.CASCADE, related_name="audit_logs"
+    )
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    old_status = models.CharField(max_length=20)
+    new_status = models.CharField(max_length=20)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+
+    def __str__(self):
+        return f"{self.application.id} - {self.old_status} -> {self.new_status} at {self.timestamp}"

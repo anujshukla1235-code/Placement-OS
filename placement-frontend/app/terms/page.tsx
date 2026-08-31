@@ -5,7 +5,7 @@ export const metadata = { title: 'Terms & Conditions' };
 export default function TermsPage() {
   return (
     <LegalPageLayout title="Terms & Conditions">
-      {`Welcome to Shukl Placement OS. By using our portal, you agree to the following:
+      {`Welcome to Placement OS. By using our portal, you agree to the following:
 
 Clause 7 (Student Consent): your data is used for analytics only in anonymized form. See our Privacy Policy for the full clause.
 

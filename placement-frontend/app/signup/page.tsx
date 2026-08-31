@@ -69,7 +69,7 @@ export default function SignupPage() {
         <form className="space-y-6" onSubmit={completeSignup} noValidate>
           <div className="mb-8 text-center">
             <h1 className="text-2xl font-extrabold text-slate-900">Create your account</h1>
-            <p className="mt-2 text-sm text-slate-500">Join Shukl Placement OS today</p>
+            <p className="mt-2 text-sm text-slate-500">Join Placement OS today</p>
           </div>
           
           <div className="space-y-5">

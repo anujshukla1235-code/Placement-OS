@@ -126,9 +126,9 @@ class ApproveRejectAPIView(APIView):
                             "email": getattr(
                                 settings,
                                 "DEFAULT_FROM_EMAIL",
-                                "noreply@shukl-placement.com",
+                                "noreply@placement.com",
                             ),
-                            "name": "Shukl Placement",
+                            "name": "Placement",
                         },
                         subject=subject,
                         text_content=message,
@@ -142,7 +142,7 @@ class ApproveRejectAPIView(APIView):
                         getattr(
                             settings,
                             "DEFAULT_FROM_EMAIL",
-                            "noreply@shukl-placement.com",
+                            "noreply@placement.com",
                         ),
                         [user.email],
                         fail_silently=False,
@@ -152,7 +152,7 @@ class ApproveRejectAPIView(APIView):
                     subject,
                     message,
                     getattr(
-                        settings, "DEFAULT_FROM_EMAIL", "noreply@shukl-placement.com"
+                        settings, "DEFAULT_FROM_EMAIL", "noreply@placement.com"
                     ),
                     [user.email],
                     fail_silently=False,
@@ -163,7 +163,7 @@ class ApproveRejectAPIView(APIView):
                     subject,
                     message,
                     getattr(
-                        settings, "DEFAULT_FROM_EMAIL", "noreply@shukl-placement.com"
+                        settings, "DEFAULT_FROM_EMAIL", "noreply@placement.com"
                     ),
                     [user.email],
                     fail_silently=True,

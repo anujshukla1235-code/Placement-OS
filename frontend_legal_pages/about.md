@@ -1,1 +1,1 @@
-We help students get placed for FREE. Cloud + AI + Blockchain powered placement OS by Anuj Shukla. Zero cost architecture.
+We help students get placed for FREE. Cloud + AI + Blockchain powered placement OS by Anuj Placementa. Zero cost architecture.

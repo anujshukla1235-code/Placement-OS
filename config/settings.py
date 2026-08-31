@@ -185,7 +185,7 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 DEFAULT_FROM_EMAIL = env(
-    "DEFAULT_FROM_EMAIL", default="Shukl Placement <noreply@shukl-placement.com>"
+    "DEFAULT_FROM_EMAIL", default="Placement <noreply@placement.com>"
 )
 
 # --- WhatsApp (Feature 55) via Twilio — see notifications/whatsapp_service.py ---

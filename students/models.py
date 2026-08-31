@@ -21,6 +21,7 @@ class StudentProfile(models.Model):
     course = models.CharField(max_length=50, blank=True)
     semester = models.IntegerField(default=1)
     cgpa = models.DecimalField(max_digits=4, decimal_places=2, default=0.00)
+    is_verified = models.BooleanField(default=False)
     gender = models.CharField(max_length=10, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True)
@@ -43,6 +44,18 @@ class StudentProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.enrollment_number}"
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            try:
+                orig = StudentProfile.objects.get(pk=self.pk)
+                if (orig.cgpa != self.cgpa or 
+                    orig.branch != self.branch or 
+                    orig.enrollment_number != self.enrollment_number):
+                    self.is_verified = False
+            except StudentProfile.DoesNotExist:
+                pass
+        super().save(*args, **kwargs)
 
 
 class Certification(models.Model):
