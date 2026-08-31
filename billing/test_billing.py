@@ -28,6 +28,7 @@ def make_approved_company(email, company_name):
 class BillingScaffoldingTests(APITestCase):
     def setUp(self):
         cache.clear()
+        Plan.objects.all().delete()
         self.user, self.company = make_approved_company(
             "billingco@test.com", "Billing Co"
         )
@@ -114,6 +115,33 @@ class BillingScaffoldingTests(APITestCase):
             )
             self.assertEqual(resp.status_code, 201)
 
-    def test_checkout_stub_returns_not_implemented(self):
-        resp = self.client.post("/api/v1/billing/checkout/", {})
-        self.assertEqual(resp.status_code, 501)
+    def test_checkout_when_stripe_unconfigured(self):
+        resp = self.client.post("/api/v1/billing/checkout/", {"plan_id": "dummy"})
+        self.assertEqual(resp.status_code, 503)
+        self.assertIn("Stripe is not configured", resp.data["error"])
+
+    def test_checkout_creates_stripe_session_successfully(self):
+        from unittest.mock import patch
+        from django.conf import settings
+        
+        plan = Plan.objects.create(name="Growth", tenant_type="COMPANY", price_per_month_inr=Decimal(2999))
+        
+        # Override settings temporarily
+        with patch.object(settings, "STRIPE_SECRET_KEY", "sk_test_mockkey"):
+            with patch("stripe.checkout.Session.create") as mock_create:
+                class MockSession:
+                    url = "https://checkout.stripe.com/pay/mock_session_123"
+                mock_create.return_value = MockSession()
+
+                resp = self.client.post(
+                    "/api/v1/billing/checkout/",
+                    {
+                        "plan_id": str(plan.id),
+                        "success_url": "http://test/success",
+                        "cancel_url": "http://test/cancel"
+                    },
+                    format="json"
+                )
+                self.assertEqual(resp.status_code, 200, resp.data)
+                self.assertEqual(resp.data["checkout_url"], "https://checkout.stripe.com/pay/mock_session_123")
+                mock_create.assert_called_once()
