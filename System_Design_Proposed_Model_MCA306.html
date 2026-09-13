@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposed Model & System Design - Placement OS - MCA 306</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&family=Merriweather:wght@400;700&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @page {
+    size: A4;
+    margin: 18mm 18mm 18mm 18mm;
+    @bottom-right {
+      content: counter(page);
+      font-family: 'Times New Roman', serif;
+      font-size: 10pt;
+    }
+  }
+
+  body {
+    font-family: 'Times New Roman', Georgia, serif;
+    font-size: 11.5pt;
+    line-height: 1.55;
+    color: #111;
+    background: #fff;
+  }
+
+  .header-container {
+    text-align: center;
+    margin-bottom: 22pt;
+    border-bottom: 2.5pt double #222;
+    padding-bottom: 12pt;
+  }
+
+  h1 {
+    font-size: 19pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
+    color: #000;
+    margin-bottom: 4pt;
+  }
+
+  .course-title {
+    font-size: 13.5pt;
+    font-weight: bold;
+    color: #1f3a52;
+    margin-bottom: 3pt;
+  }
+
+  .project-name {
+    font-size: 12.5pt;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6pt;
+  }
+
+  .meta-info {
+    font-size: 10.5pt;
+    color: #444;
+  }
+
+  .meta-info span {
+    font-weight: bold;
+    color: #111;
+  }
+
+  h2 {
+    font-size: 13.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.3pt;
+    margin-top: 20pt;
+    margin-bottom: 8pt;
+    color: #000;
+    border-bottom: 1pt solid #000;
+    padding-bottom: 3pt;
+  }
+
+  h3 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 14pt;
+    margin-bottom: 6pt;
+    color: #111;
+  }
+
+  h4 {
+    font-size: 11.5pt;
+    font-weight: bold;
+    font-style: italic;
+    margin-top: 10pt;
+    margin-bottom: 4pt;
+    color: #222;
+  }
+
+  p {
+    margin-bottom: 7pt;
+    text-align: justify;
+    text-justify: inter-word;
+    text-indent: 20pt;
+  }
+
+  p.no-indent { text-indent: 0; }
+
+  ul, ol {
+    margin-left: 24pt;
+    margin-bottom: 8pt;
+  }
+
+  li {
+    margin-bottom: 3pt;
+    text-align: justify;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12pt 0;
+    font-size: 9pt;
+    line-height: 1.35;
+  }
+
+  th {
+    background: #1f3a52;
+    color: #ffffff;
+    padding: 5pt 5pt;
+    text-align: left;
+    font-weight: bold;
+    border: 1pt solid #1f3a52;
+  }
+
+  td {
+    padding: 4.5pt 5pt;
+    border: 0.5pt solid #bbb;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) { background: #f8f9fa; }
+
+  .diagram-box {
+    border: 1pt solid #ccc;
+    background: #fdfdfd;
+    padding: 10pt;
+    margin: 12pt 0;
+    border-radius: 3pt;
+  }
+
+  .diagram-title {
+    font-size: 10pt;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 6pt;
+    color: #333;
+    font-style: italic;
+  }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8pt;
+    margin: 10pt 0;
+  }
+
+  .arch-card {
+    border: 1pt solid #334e68;
+    background: #f0f4f8;
+    padding: 8pt;
+    border-radius: 3pt;
+  }
+
+  .arch-card h5 {
+    font-size: 10.5pt;
+    color: #102a43;
+    border-bottom: 0.5pt solid #334e68;
+    margin-bottom: 4pt;
+    padding-bottom: 2pt;
+  }
+
+  .arch-card p {
+    font-size: 9pt;
+    text-indent: 0;
+    margin-bottom: 2pt;
+    line-height: 1.3;
+  }
+
+  .code-block {
+    background: #272822;
+    color: #f8f8f2;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 8.5pt;
+    line-height: 1.35;
+    padding: 8pt 10pt;
+    border-radius: 3pt;
+    margin: 8pt 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .formula-box {
+    background: #f4f6f8;
+    border-left: 3.5pt solid #1f3a52;
+    padding: 8pt 12pt;
+    margin: 8pt 0;
+    font-style: italic;
+    font-size: 10.5pt;
+  }
+
+  .page-break { page-break-before: always; }
+
+  @media print {
+    body {
+      font-size: 10.5pt;
+      line-height: 1.45;
+    }
+    .page-break { page-break-before: always; }
+    table { font-size: 8pt; }
+    h1 { font-size: 17pt; }
+    h2 { font-size: 12.5pt; }
+    h3 { font-size: 11pt; }
+    .code-block { font-size: 7.5pt; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header-container">
+  <h1>Proposed Model &amp; System Design</h1>
+  <div class="course-title">MCA 306 &mdash; Minor Project-II</div>
+  <div class="project-name">Project Title: Placement OS &mdash; AI-Powered Multi-Tenant Campus Placement Management System</div>
+  <div class="meta-info">
+    Candidate Name: <span>Anuj Shukla</span> &nbsp;|&nbsp; 
+    Program: <span>Master of Computer Applications (MCA)</span>
+  </div>
+</div>
+
+<!-- Section 1 -->
+<h2>1. System Overview &amp; Architectural Scope</h2>
+
+<p><strong>Placement OS</strong> is an enterprise-grade, multi-tenant B2B Software-as-a-Service (SaaS) platform engineered to unify, automate, and algorithmically optimize the end-to-end campus placement lifecycle across higher education institutions. The system integrates four specialized user roles &mdash; <strong>Students</strong>, <strong>Corporate Recruiters (Companies)</strong>, <strong>College Placement Authorities (TPOs)</strong>, and <strong>Platform Super-Administrators</strong> &mdash; operating under strict row-level tenant isolation, rate-limited API access, and granular Role-Based Access Control (RBAC).</p>
+
+<p>The core computational pillars of Placement OS encompass:</p>
+<ol>
+  <li><strong>Dual-Engine AI ATS Resume Screening:</strong> Integrating mathematical n-gram TF-IDF vector space modeling with NLP skill-dictionary parsing and Generative AI qualitative feedback.</li>
+  <li><strong>Cryptographic Blockchain-Inspired Offer Verification:</strong> SHA-256 sequential hash-chaining binding student, company, and remuneration credentials with public QR validation.</li>
+  <li><strong>Supervised Machine Learning Placement Predictor:</strong> Logistic Regression classification model calculating probability-of-placement based on academic and skill features.</li>
+  <li><strong>Multi-Channel Asynchronous Event Pipeline:</strong> Celery-Redis task workers dispatching transactional emails, in-app alerts, and automated WhatsApp notifications.</li>
+</ol>
+
+<!-- Section 2 -->
+<h2>2. System Architecture &amp; Block Diagram</h2>
+
+<div class="diagram-box">
+  <div class="arch-grid">
+    <div class="arch-card">
+      <h5>1. Client &amp; Presentation Layer</h5>
+      <p><strong>Tech:</strong> Next.js 16.3, React 19, TypeScript, Tailwind CSS, Lucide Icons, Sonner</p>
+      <p><strong>Modules:</strong> Responsive Student Portal, Recruiter Job Workspace, College TPO Roster &amp; CSV Ingestion, SuperAdmin Verification Console.</p>
+    </div>
+    <div class="arch-card">
+      <h5>2. API Gateway &amp; Middleware Layer</h5>
+      <p><strong>Tech:</strong> Django REST Framework, SimpleJWT (Token Rotation + Blacklist), CORS Middleware</p>
+      <p><strong>Security:</strong> TenantMiddleware (Request Scoping), TenantRateThrottle (User-ID Keyed Quotas), Brute-Force Lockout Defense.</p>
+    </div>
+    <div class="arch-card">
+      <h5>3. Business &amp; Application Services Layer</h5>
+      <p><strong>Tech:</strong> Python 3.12, Django ORM, Celery 5.4 Async Task Queues, Celery Beat Schedulers</p>
+      <p><strong>Apps:</strong> accounts, students, companies, jobs, interviews, ai_module, data_science, blockchain_module, analytics, learn, notifications, billing.</p>
+    </div>
+    <div class="arch-card">
+      <h5>4. AI / ML &amp; Cryptographic Engine</h5>
+      <p><strong>Tech:</strong> Scikit-Learn (TF-IDF), Gemini 1.5 Flash API, pdfplumber/PyPDF2, hashlib (SHA-256), qrcode</p>
+      <p><strong>Services:</strong> 3-tier ATS scoring, Gemini feedback generation, LogReg placement probability, Offer hash-chaining &amp; QR encoding.</p>
+    </div>
+  </div>
+  <div class="arch-card" style="margin-top:6pt;">
+    <h5>5. Data Persistence, Caching &amp; File Storage Layer</h5>
+    <p><strong>Relational Store:</strong> PostgreSQL (Production with Connection Pooling) / SQLite3 (Development)</p>
+    <p><strong>In-Memory Cache &amp; Broker:</strong> Redis 5.0 (Session Cache, Throttle Storage, Celery Message Broker)</p>
+    <p><strong>Media Storage &amp; Static Delivery:</strong> Cloudinary Storage (CDN Assets, PDF Resumes, Offer QR Codes) / WhiteNoise</p>
+  </div>
+  <div class="diagram-title">Figure 2.1: Multi-Tiered Modular System Architecture Block Diagram of Placement OS</div>
+</div>
+
+<!-- Section 3 -->
+<div class="page-break"></div>
+<h2>3. Comprehensive Technology Stack Specifications</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width: 22%;">Architectural Layer</th>
+      <th style="width: 28%;">Technology / Framework</th>
+      <th style="width: 50%;">Functional Responsibility &amp; Rationale</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Frontend Framework</strong></td>
+      <td>Next.js 16.3 (React 19, TypeScript)</td>
+      <td>Server-Side Rendering (SSR), App Router architecture, type-safe API communication, reactive dashboard state management.</td>
+    </tr>
+    <tr>
+      <td><strong>Styling &amp; Components</strong></td>
+      <td>Tailwind CSS 4.3.3, Lucide-React</td>
+      <td>Utility-first responsive styling, dark/light accessibility, component composition for enterprise UX.</td>
+    </tr>
+    <tr>
+      <td><strong>Backend API Core</strong></td>
+      <td>Django 5.x, Django REST Framework</td>
+      <td>High-throughput RESTful API, robust ORM, automatic schema serialization, enterprise middleware pipeline.</td>
+    </tr>
+    <tr>
+      <td><strong>Authentication &amp; 2FA</strong></td>
+      <td>SimpleJWT, Email OTP Service</td>
+      <td>Stateless JWT token rotation (30-min access, 1-day refresh), mandatory email-based 2-Factor Authentication (MFA).</td>
+    </tr>
+    <tr>
+      <td><strong>Database &amp; ORM</strong></td>
+      <td>PostgreSQL, dj-database-url</td>
+      <td>ACID-compliant relational persistence, composite indexing, JSONField attributes for dynamic skill mapping.</td>
+    </tr>
+    <tr>
+      <td><strong>Task Queue &amp; Caching</strong></td>
+      <td>Celery 5.4, Redis 5.0, Celery Beat</td>
+      <td>Asynchronous background PDF parsing, automated transactional email dispatch, daily analytics digests.</td>
+    </tr>
+    <tr>
+      <td><strong>Natural Language Processing</strong></td>
+      <td>Scikit-Learn (TF-IDF Vectorizer)</td>
+      <td>N-gram (1,2) document vectorization and Cosine distance similarity evaluation between resumes and job specs.</td>
+    </tr>
+    <tr>
+      <td><strong>Generative AI Engine</strong></td>
+      <td>Google Gemini 1.5 Flash REST API</td>
+      <td>Automated prompt-engineered synthesis of qualitative, constructive resume improvement feedback.</td>
+    </tr>
+    <tr>
+      <td><strong>Machine Learning Core</strong></td>
+      <td>Joblib, Scikit-Learn (Logistic Regression)</td>
+      <td>Feature-engineered candidate probability classification modeling with mathematical fallback heuristic.</td>
+    </tr>
+    <tr>
+      <td><strong>Document &amp; PDF Parsing</strong></td>
+      <td>pdfplumber, PyPDF2</td>
+      <td>Extraction of raw text from multi-page PDF resumes, magic byte inspection (b"%PDF-"), ownership validation.</td>
+    </tr>
+    <tr>
+      <td><strong>Blockchain &amp; Hashing</strong></td>
+      <td>Hashlib (SHA-256), qrcode 7.4.2</td>
+      <td>Cryptographic hash-chain linking of consecutive offer letters, generation of verification QR matrices.</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-Channel Alerts</strong></td>
+      <td>Twilio API, Brevo SMTP / API</td>
+      <td>Direct student WhatsApp status updates, transactional OTP distribution with 2-minute expiration.</td>
+    </tr>
+    <tr>
+      <td><strong>API Schema &amp; Docs</strong></td>
+      <td>drf-spectacular (OpenAPI 3.0)</td>
+      <td>Dynamic OpenAPI schema generation powering interactive Swagger-UI and ReDoc API explorers.</td>
+    </tr>
+    <tr>
+      <td><strong>Observability &amp; Logs</strong></td>
+      <td>Python-JSON-Logger, Sentry SDK</td>
+      <td>Centralized structured JSON logging across all backend modules, PII-scrubbed distributed error tracing.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Section 4 -->
+<div class="page-break"></div>
+<h2>4. Entity-Relationship (ER) Schema Design</h2>
+
+<p class="no-indent">Placement OS is governed by a normalized relational database schema comprising 18 interconnected models across functional apps:</p>
+
+<div class="code-block">
+[User] (UUID id PK, email UK, first_name, last_name, role: STUDENT|COMPANY|COLLEGE|ADMIN, is_verified, is_mfa_enabled, lockout_until)
+  |-- 1:1 --> [StudentProfile] (UUID id PK, user_id FK, college_id FK, enrollment_number UK, branch, cgpa, resume, ats_score, skills: JSON)
+  |             |-- 1:N --> [Certification] (UUID id PK, student_id FK, name, issuer, issued_date, certificate_url)
+  |             |-- 1:N --> [Project] (UUID id PK, student_id FK, title, tech_stack: JSON, project_url)
+  |             |-- 1:N --> [Application] (UUID id PK, student_id FK, job_id FK, status: APPLIED|SHORTLISTED|INTERVIEW|OFFERED|REJECTED, ats_score)
+  |             |             |-- 1:N --> [ApplicationAuditLog] (UUID id PK, app_id FK, changed_by FK, old_status, new_status, timestamp)
+  |             |             |-- 1:N --> [Interview] (UUID id PK, app_id FK, scheduled_at, mode: ONLINE|OFFLINE, status: SCHEDULED|COMPLETED)
+  |             |             |             |-- 1:1 --> [InterviewPerformance] (UUID id PK, interview_id FK, score, feedback, outcome)
+  |             |             |-- 1:1 --> [OfferLetter] (UUID id PK, app_id FK, hash_sha256, previous_hash, qr_code, verified_count)
+  |             |-- 1:N --> [PlacementPrediction] (UUID id PK, student_id FK, job_id FK, probability, model_version)
+  |             |-- 1:N --> [TestResult] (UUID id PK, student_id FK, module_id FK, score, passed)
+  |
+  |-- 1:1 --> [CollegeProfile] (UUID id PK, user_id FK, college_name, tpo_name, tpo_phone, is_approved)
+  |             |-- 1:N --> [StudentProfile] (Enrolled Students Roster)
+  |
+  |-- 1:1 --> [CompanyProfile] (UUID id PK, user_id FK, company_name, hr_name, gst_number, is_approved)
+  |             |-- 1:N --> [Job] (UUID id PK, company_id FK, title, eligibility_branch: JSON, required_skills: JSON, min_cgpa, ctc, status)
+  |                           |-- 1:N --> [Application] (Incoming Candidate Applications)
+  |
+  |-- 1:N --> [OTPVerification] (UUID id PK, user_id FK, email, otp, purpose: REGISTER|LOGIN, expires_at, is_used, attempts)
+  |-- 1:N --> [LoginHistory] (UUID id PK, user_id FK, ip_address, device_info, login_at)
+  |-- 1:1 --> [Subscription] (UUID id PK, user_id FK, plan_id FK, status: TRIALING|ACTIVE|PAST_DUE, current_period_end)
+  |             |-- N:1 --> [Plan] (UUID id PK, name, tenant_type: COMPANY|COLLEGE, price_per_month_inr, max_active_jobs, max_students)
+  |-- 1:N --> [Notification] (UUID id PK, user_id FK, message, notif_type: info|success|warning|error, read, data: JSON)
+  |-- 1:N --> [SupportTicket] (UUID id PK, user_id FK, subject, message, status: OPEN|SOLVED)
+
+[LearnModule] (UUID id PK, title, youtube_video_id, notes, questions: JSON)
+  |-- 1:N --> [TestResult] (Student Assessment Attempts)
+</div>
+<div class="diagram-title">Figure 4.1: Relational Entity Structure and Cardinality Mapping of Placement OS</div>
+
+<!-- Section 5 -->
+<div class="page-break"></div>
+<h2>5. Data Flow Diagrams (DFDs)</h2>
+
+<h3>5.1 Context Diagram (Level-0 DFD)</h3>
+<p class="no-indent">The Context DFD establishes the environmental boundary of Placement OS, mapping information exchanges between external entities and the centralized system:</p>
+
+<div class="code-block">
+  +------------------+         Registration, Resumes, Applications, OTPs        +---------------------+
+  |     STUDENT      | =======================================================> |                     |
+  |                  | <------------------------------------------------------- |                     |
+  +------------------+         ATS Scores, Job Feeds, Predictions, Offers       |                     |
+                                                                                |                     |
+  +------------------+         Job Postings, Shortlists, Schedules, Offers      |                     |
+  |     COMPANY      | =======================================================> |    PLACEMENT OS     |
+  |   (RECRUITER)    | <------------------------------------------------------- |   CORE SYSTEM       |
+  +------------------+         Applicant Resumes, Candidate Analytics           |                     |
+                                                                                |                     |
+  +------------------+         Student Approvals, Drive Quotas, Batch CSV       |                     |
+  |  COLLEGE (TPO)   | =======================================================> |                     |
+  |                  | <------------------------------------------------------- |                     |
+  +------------------+         Placement Metrics, Accreditation Audit Data      +---------------------+
+                                                                                   ||      ||      ||
+  +------------------+         Approvals, Health Audit, Plan Limits                ||      ||      ||
+  |   SUPER-ADMIN    | ============================================================++      ||      ||
+  +------------------+                                                                     ||      ||
+                                                                                           \/      \/
+                                           +--------------------+   +-------------------+   +--------------------+
+                                           |  Brevo / Twilio    |   | Google Gemini API |   |  Cloudinary Store  |
+                                           |  Email & WhatsApp  |   |  AI Feedback LLM  |   | Resumes & QR Media |
+                                           +--------------------+   +-------------------+   +--------------------+
+</div>
+<div class="diagram-title">Figure 5.1: Level-0 Context Data Flow Diagram of Placement OS</div>
+
+<h3>5.2 Level-1 DFD &mdash; Functional Decomposition</h3>
+<p class="no-indent">The Level-1 DFD decomposes the system into 7 primary computational processes:</p>
+
+<div class="code-block">
+[STUDENT] ---> ( 1.0 Auth & MFA ) ------------> [D1: User & OTP Store]
+                    |
+[COMPANY] ---> ( 2.0 Job Lifecycle ) ---------> [D2: Job Database]
+                    |                                  |
+                    v                                  v
+[STUDENT] ---> ( 3.0 App & ATS Engine ) <-----+ [D3: Skills & NLP Dict]
+                    |                                  |
+                    +---------------------------------> [D4: Application & Audit Store]
+                    |                                  |
+[COMPANY] ---> ( 4.0 Interview Pipeline ) <----+-------+
+                    |                                  |
+                    v                                  v
+[COMPANY] ---> ( 5.0 Offer Chain & QR ) ------> [D5: Chained Offer Letters] ---> [Public Verifier]
+                    |
+[COLLEGE] ---> ( 6.0 Institutional Analytics ) < [D4 & D5 Aggregates]
+                    |
+[STUDENT] ---> ( 7.0 LMS Learning & Quiz ) ---> [D6: Video & Quiz Store]
+</div>
+<div class="diagram-title">Figure 5.2: Level-1 Functional Decomposition Data Flow Diagram</div>
+
+<h3>5.3 Level-2 DFD &mdash; Subsystem 3.0: Application Processing &amp; ATS Scoring</h3>
+<div class="code-block">
+[Candidate Application + PDF Resume]
+        |
+        v
+( 3.1 Eligibility Check ) -----> [Branch ∈ eligibility_branch && CGPA >= min_cgpa]
+        | (Pass)
+        v
+( 3.2 Magic Byte & Text Extraction ) ---> [pdfplumber / PyPDF2 Stream Reader]
+        | (Extracted Text)
+        +----------------------------------------+
+        |                                        |
+        v                                        v
+( 3.3 NLP Skill Extraction )             ( 3.4 TF-IDF Vectorization )
+  Match against [Skills Dictionary]        n-gram (1,2) Cosine Distance vs JD
+        |                                        |
+        +-------------------+--------------------+
+                            |
+                            v
+                ( 3.5 Weighted ATS Scoring )
+                  50% Cosine + 35% Skill Match + 15% Qual
+                            |
+                            v
+                ( 3.6 Gemini AI Feedback )
+                  Generates 2-3 sentence remediation
+                            |
+                            v
+                [Save Application + ATS Score + Audit Log]
+</div>
+<div class="diagram-title">Figure 5.3: Level-2 Detailed DFD for ATS Scoring and Feedback Subsystem</div>
+
+<!-- Section 6 -->
+<div class="page-break"></div>
+<h2>6. Core Process Flowcharts</h2>
+
+<h3>6.1 User Registration, Two-Factor Authentication &amp; RBAC Onboarding</h3>
+<div class="code-block">
+[Start] --> [User Submits Registration Form] --> [Validate Email, Pass, Role]
+  |
+  +--> Email Exists? --(Yes)--> [Display Conflict Error] --> [Retry]
+  |
+  +--(No)--> [Create User Record (is_verified=False)]
+                |
+                v
+             [Generate 6-Digit Cryptographic OTP]
+                |
+                v
+             [Dispatch Celery Task: send_otp_email_task (2-5 min expiry)]
+                |
+                v
+             [User Inputs OTP on Client Screen]
+                |
+                +--> OTP Valid & Attempts < 3? --(No)--> [Increment Attempts / Lockout]
+                |
+                +--(Yes)--> [Set is_verified = True, Mark OTP Used]
+                               |
+                               v
+                            [Role-Based Redirection]
+                               |-- STUDENT --> [Student Profile Setup (CGPA, Branch, Resume)]
+                               |-- COMPANY --> [Company Workspace Setup (GST, HR Details)]
+                               |-- COLLEGE --> [TPO Institutional Onboarding & Verification]
+                               |-- ADMIN   --> [SuperAdmin Console]
+</div>
+<div class="diagram-title">Figure 6.1: Registration, Multi-Factor Authentication (OTP) and Onboarding Flowchart</div>
+
+<h3>6.2 Cryptographic Offer Letter Generation &amp; Public QR Verification</h3>
+<div class="code-block">
+[Company Selects Candidate] --> [Input CTC, Designation, Joining Date]
+  |
+  v
+[Retrieve Previous Offer's SHA-256 Hash]
+  |-- If Genesis (First Offer) --> previous_hash = "000...000" (64 zeros)
+  |-- Else                     --> previous_hash = last_offer.hash_sha256
+  |
+  v
+[Construct Deterministic Hash String: Student | Company | Role | CTC | Date | Content | PrevHash]
+  |
+  v
+[Compute SHA-256 Digest] --> [Save OfferLetter Record with Hash Pointer]
+  |
+  v
+[Generate Public QR Code: https://placement-os/verify/offer/{offer_id}/]
+  |
+  v
+[Update Application Status = OFFERED] --> [Student Receives Tamper-Proof Offer Letter]
+
+--- PUBLIC VERIFICATION FLOW ---
+[Verifier Scans QR / Opens URL] --> [Fetch Offer Record by UUID]
+  |
+  v
+[Recompute SHA-256 Hash using Stored Field Payload]
+  |
+  +--> Stored Hash == Recomputed Hash?
+          |--(No)  --> [DISPLAY: RED ALERT - Document Tampered / Invalid]
+          |--(Yes) --> [DISPLAY: GREEN BADGE - Authenticated Offer Verified]
+                          |
+                          v
+                       [Increment verified_count Metric]
+</div>
+<div class="diagram-title">Figure 6.2: Blockchain-Inspired Sequential Hash-Chain Generation & QR Verification Flowchart</div>
+
+<!-- Section 7 -->
+<div class="page-break"></div>
+<h2>7. Core Mathematical Formulations &amp; Algorithms</h2>
+
+<h3>7.1 Hybrid ATS Resume Scoring Algorithm</h3>
+
+<div class="formula-box">
+  $$\text{ATS Score} = \Big(0.50 \times \mathcal{S}_{\text{cosine}} \times 100\Big) + \Big(0.35 \times \mathcal{R}_{\text{skills}} \times 100\Big) + \Big(0.15 \times \mathcal{Q}_{\text{qual}} \times 100\Big)$$
+  <br>
+  $$\text{Where: } \mathcal{S}_{\text{cosine}} = \frac{\mathbf{v}_{\text{resume}} \cdot \mathbf{v}_{\text{job}}}{\|\mathbf{v}_{\text{resume}}\| \|\mathbf{v}_{\text{job}}\|}, \quad \mathcal{R}_{\text{skills}} = \frac{|\mathcal{K}_{\text{resume}} \cap \mathcal{K}_{\text{job}}|}{|\mathcal{K}_{\text{job}}|}, \quad \mathcal{Q}_{\text{qual}} = \begin{cases} 1.0 & \text{if branch eligible} \\ 0.5 & \text{otherwise} \end{cases}$$
+</div>
+
+<div class="code-block">
+ALGORITHM: CalculateHybridATSScore
+INPUT: resume_pdf_stream, job_record, student_profile
+OUTPUT: { ats_score: Float, matched_skills: List, missing_skills: List, ai_feedback: String }
+
+BEGIN
+    // Step 1: Text extraction and validation
+    raw_text = ExtractTextWithFallback(resume_pdf_stream)
+    IF raw_text IS EMPTY THEN RETURN { ats_score: 0.0, error: "Unreadable PDF" }
+
+    // Step 2: N-gram TF-IDF Vector Space Modeling
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2), stop_words='english')
+    tfidf_matrix = vectorizer.fit_transform([raw_text, job_record.description])
+    cosine_sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
+
+    // Step 3: NLP Dictionary Skill Extraction
+    extracted_skills = MatchSkillDictionary(raw_text, SKILLS_DICTIONARY)
+    required_skills = job_record.required_skills
+    matched_skills = extracted_skills INTERSECT required_skills
+    missing_skills = required_skills DIFFERENCE extracted_skills
+    skill_ratio = LENGTH(matched_skills) / MAX(LENGTH(required_skills), 1)
+
+    // Step 4: Qualification & Cutoff Computation
+    qual_factor = (student_profile.branch IN job_record.eligibility_branch) ? 1.0 : 0.5
+
+    // Step 5: Final Weighted Aggregation
+    composite_ats = (0.50 * cosine_sim * 100) + (0.35 * skill_ratio * 100) + (0.15 * qual_factor * 100)
+    final_score = CLAMP(ROUND(composite_ats, 2), 0.0, 100.0)
+
+    // Step 6: Asynchronous Generative AI Feedback (Gemini API)
+    feedback_text = GenerateGeminiFeedback(raw_text, matched_skills, missing_skills)
+
+    RETURN { ats_score: final_score, matched_skills, missing_skills, ai_feedback: feedback_text }
+END
+</div>
+
+<h3>7.2 Sequential Hash-Chain Generation &amp; Integrity Verification Algorithm</h3>
+<div class="code-block">
+ALGORITHM: ComputeSequentialOfferHash
+INPUT: candidate_name, company_name, designation, salary_ctc, joining_date, offer_text
+OUTPUT: { sha256_digest: String, previous_hash: String }
+
+BEGIN
+    last_offer = OfferLetter.objects.order_by('-issued_at').first()
+    previous_hash = (last_offer != NULL) ? last_offer.hash_sha256 : REPEAT("0", 64)
+
+    payload_string = CONCAT_WITH_PIPE(
+        candidate_name, company_name, designation, salary_ctc, joining_date, offer_text, previous_hash
+    )
+    
+    sha256_digest = SHA256(UTF8_ENCODE(payload_string)).HEX_DIGEST()
+    RETURN { sha256_digest, previous_hash }
+END
+</div>
+
+<!-- Section 8 -->
+<div class="page-break"></div>
+<h2>8. Detailed Module-Wise System Architecture</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Django Module</th>
+      <th style="width: 35%;">Database Entities &amp; Schema Keys</th>
+      <th style="width: 45%;">Functional Logic &amp; Business Rules</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>accounts</strong></td>
+      <td>User, CollegeProfile, CompanyProfile, OTPVerification, LoginHistory</td>
+      <td>Manages 4-tier RBAC, JWT issuance, 2-minute MFA verification, 15-minute brute-force lockout after 5 failed logins, GDPR account deletion.</td>
+    </tr>
+    <tr>
+      <td><strong>students</strong></td>
+      <td>StudentProfile, Certification, Project</td>
+      <td>Manages academic credentials, streak gamification, PDF resume validation. Auto-invalidates is_verified status if CGPA or branch is altered.</td>
+    </tr>
+    <tr>
+      <td><strong>jobs</strong></td>
+      <td>Job, Application, ApplicationAuditLog</td>
+      <td>Job posting CRUD, candidate application filtering, mandatory rejection reason capture (Feature 52), ZIP bulk resume download.</td>
+    </tr>
+    <tr>
+      <td><strong>interviews</strong></td>
+      <td>Interview, InterviewPerformance</td>
+      <td>Multi-round scheduling (Online/Offline), panel details management, structured scoring, and outcome classification (Selected/Rejected/On-Hold).</td>
+    </tr>
+    <tr>
+      <td><strong>ai_module</strong></td>
+      <td>*NLP Engine (Stateless)*</td>
+      <td>Dual-engine ATS scoring, pdfplumber text parser, skills_dictionary matcher, Gemini 1.5 Flash API feedback synthesizer.</td>
+    </tr>
+    <tr>
+      <td><strong>blockchain_module</strong></td>
+      <td>OfferLetter</td>
+      <td>Cryptographic SHA-256 sequential hash pointer chaining, automated QR image generation, public zero-auth verification endpoint.</td>
+    </tr>
+    <tr>
+      <td><strong>data_science</strong></td>
+      <td>PlacementPrediction</td>
+      <td>Logistic Regression model (logreg_v1.pkl) calculating student selection probability across open jobs with weighted rule-based fallback.</td>
+    </tr>
+    <tr>
+      <td><strong>analytics</strong></td>
+      <td>SupportTicket, PlacedStudent, Notification</td>
+      <td>Aggregates branch-wise placement percentages, median CTC metrics, daily digest Celery tasks, support ticket tracking.</td>
+    </tr>
+    <tr>
+      <td><strong>learn</strong></td>
+      <td>LearnModule, TestResult</td>
+      <td>Embedded YouTube LMS lectures, randomized 15-MCQ test engine, automated scoring, Gemini AI dynamic question generator.</td>
+    </tr>
+    <tr>
+      <td><strong>notifications</strong></td>
+      <td>Notification (app-wide)</td>
+      <td>Typed user alerts (info, success, warning, error), real-time unread counts, integration with Twilio WhatsApp messaging.</td>
+    </tr>
+    <tr>
+      <td><strong>billing</strong></td>
+      <td>Plan, Subscription</td>
+      <td>Multi-tenant B2B SaaS subscription management, job posting quota limits, college student roster enforcement, Stripe webhook listener.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Section 9 -->
+<h2>9. Multi-Layered Security Architecture</h2>
+
+<div class="diagram-box">
+  <ol style="margin-left:18pt;">
+    <li><strong>Layer 1 &mdash; Transport Security:</strong> Strict HTTPS/TLS enforcement, HSTS (31,536,000s), Secure &amp; HttpOnly Cookie flags, X-Frame-Options: DENY.</li>
+    <li><strong>Layer 2 &mdash; Authentication &amp; Token Lifecycle:</strong> SimpleJWT stateless tokens (30-min access, 1-day refresh) with automated rotation and token blacklisting.</li>
+    <li><strong>Layer 3 &mdash; Two-Factor MFA Hardening:</strong> Mandatory email OTP for logins with 2-minute expiration and 3-attempt brute-force invalidation.</li>
+    <li><strong>Layer 4 &mdash; Role-Based Access Control:</strong> Strict permission classes (IsAuthenticated, IsCompany, IsCollege, IsAdmin) on all DRF viewsets.</li>
+    <li><strong>Layer 5 &mdash; Logical Multi-Tenancy Isolation:</strong> TenantMiddleware resolves tenant context per-request, enforcing row-level database QuerySet isolation.</li>
+    <li><strong>Layer 6 &mdash; Tenant-Scoped Rate Throttling:</strong> Custom TenantRateThrottle keys buckets by Tenant ID, insulating tenants from noisy-neighbor quota exhaustion.</li>
+    <li><strong>Layer 7 &mdash; Data Integrity &amp; Auditability:</strong> SHA-256 chained hashes for digital offers, immutable ApplicationAuditLog tracking all status transitions.</li>
+    <li><strong>Layer 8 &mdash; Centralized Observability:</strong> Structured JSON logging via python-json-logger, PII-sanitized error monitoring via Sentry.</li>
+  </ol>
+  <div class="diagram-title">Figure 9.1: 8-Layer Defense-in-Depth Security Matrix of Placement OS</div>
+</div>
+
+<!-- Section 10 -->
+<div class="page-break"></div>
+<h2>10. Frontend Architecture &amp; Complete Route Map</h2>
+
+<p class="no-indent">The Next.js 16 client application exposes 28 distinct, role-guarded routes structured within the App Router paradigm:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width: 25%;">Route Path</th>
+      <th style="width: 25%;">Target User Role</th>
+      <th style="width: 50%;">Functional Responsibility &amp; Component Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><code>/</code></td><td>Public</td><td>Platform landing page displaying feature highlights, metrics, and testimonials.</td></tr>
+    <tr><td><code>/login</code></td><td>Public</td><td>Two-step authentication interface supporting email, password, and MFA OTP inputs.</td></tr>
+    <tr><td><code>/signup</code></td><td>Public</td><td>Multi-role registration interface with Clause 7 &amp; 8 legal consent captures.</td></tr>
+    <tr><td><code>/forgot-password</code></td><td>Public</td><td>Self-service password recovery with email OTP verification.</td></tr>
+    <tr><td><code>/dashboard</code></td><td>Authenticated</td><td>Intelligent role-based redirect router dispatching users to designated portals.</td></tr>
+    <tr><td><code>/student-dashboard</code></td><td>Student</td><td>Candidate portal with ATS score display, job search, interview tracker, streak metrics.</td></tr>
+    <tr><td><code>/company-dashboard</code></td><td>Company</td><td>Recruiter workspace for job posting creation, applicant review, interview scheduling.</td></tr>
+    <tr><td><code>/college-dashboard</code></td><td>College / TPO</td><td>Institutional dashboard displaying student rosters, CSV batch ingestion, placement KPIs.</td></tr>
+    <tr><td><code>/admin</code></td><td>SuperAdmin</td><td>System-wide administrative health, tenant management, and platform metrics.</td></tr>
+    <tr><td><code>/admin/approvals</code></td><td>SuperAdmin</td><td>Verification and approval console for pending Company and College tenant registrations.</td></tr>
+    <tr><td><code>/tpo/approvals</code></td><td>College / TPO</td><td>Internal student profile verification portal for academic credential authorization.</td></tr>
+    <tr><td><code>/jobs</code></td><td>Authenticated</td><td>Searchable and filterable job board (branch, CTC, skills, location).</td></tr>
+    <tr><td><code>/applications</code></td><td>Student</td><td>Personal job application tracker with real-time status badges.</td></tr>
+    <tr><td><code>/applications/[id]</code></td><td>Student / Recruiter</td><td>Detailed application lifecycle view displaying ATS breakdown, audit timeline, reasons.</td></tr>
+    <tr><td><code>/interviews</code></td><td>Authenticated</td><td>Calendar view of upcoming online/offline technical and HR interview rounds.</td></tr>
+    <tr><td><code>/companies</code></td><td>Authenticated</td><td>Searchable directory of verified corporate recruiters.</td></tr>
+    <tr><td><code>/companies/[id]</code></td><td>Authenticated</td><td>Public corporate profile displaying active job drives and recruiter background.</td></tr>
+    <tr><td><code>/onboarding/student</code></td><td>Student</td><td>Profile completion wizard capturing CGPA, branch, semester, and resume PDF.</td></tr>
+    <tr><td><code>/onboarding/company</code></td><td>Company</td><td>Recruiter setup wizard capturing GSTIN, company bio, and verification docs.</td></tr>
+    <tr><td><code>/onboarding/college</code></td><td>College</td><td>TPO setup wizard capturing institutional accreditation, TPO contact, and branding.</td></tr>
+    <tr><td><code>/about</code>, <code>/contact</code></td><td>Public</td><td>Institutional information, help desk submission, and platform overview.</td></tr>
+    <tr><td><code>/privacy</code>, <code>/terms</code></td><td>Public</td><td>Legal compliance documentation, GDPR privacy policies, terms of service.</td></tr>
+    <tr><td><code>/dmca</code>, <code>/tenant-agreement</code></td><td>Public</td><td>Intellectual property notices and B2B SaaS institutional terms of agreement.</td></tr>
+  </tbody>
+</table>
+
+<!-- Section 11 -->
+<h2>11. RESTful API Endpoint Directory</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width: 30%;">API Endpoint Pattern</th>
+      <th style="width: 15%;">HTTP Method</th>
+      <th style="width: 55%;">Backend DRF View &amp; Functional Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><code>/health/</code>, <code>/ready/</code></td><td>GET</td><td><code>HealthCheckView</code>: System liveness and DB/Redis readiness check.</td></tr>
+    <tr><td><code>/verify/offer/&lt;uuid:id&gt;/</code></td><td>GET</td><td><code>VerifyOfferView</code>: Public zero-auth QR tamper verification endpoint.</td></tr>
+    <tr><td><code>/api/v1/accounts/register/</code></td><td>POST</td><td><code>RegisterView</code>: Registers new tenant/user and dispatches OTP email.</td></tr>
+    <tr><td><code>/api/v1/accounts/login/</code></td><td>POST</td><td><code>LoginView</code>: Password verification and 2FA OTP challenge initiation.</td></tr>
+    <tr><td><code>/api/v1/accounts/login/verify-mfa/</code></td><td>POST</td><td><code>VerifyLoginMFAView</code>: Validates 2FA OTP and issues SimpleJWT tokens.</td></tr>
+    <tr><td><code>/api/v1/token/refresh/</code></td><td>POST</td><td><code>TokenRefreshView</code>: Rotates refresh token and issues fresh access token.</td></tr>
+    <tr><td><code>/api/v1/students/me/</code></td><td>GET, PUT</td><td><code>StudentMeView</code>: Retrieves and updates candidate profile credentials.</td></tr>
+    <tr><td><code>/api/v1/students/resume/upload/</code></td><td>POST</td><td><code>ResumeUploadView</code>: Magic byte inspection and async resume text parsing.</td></tr>
+    <tr><td><code>/api/v1/jobs/</code></td><td>GET, POST</td><td><code>JobListCreateView</code>: Lists active jobs (GET) or posts job with quota check (POST).</td></tr>
+    <tr><td><code>/api/v1/jobs/&lt;uuid:id&gt;/apply/</code></td><td>POST</td><td><code>ApplyJobView</code>: Validates eligibility, creates app, and triggers ATS task.</td></tr>
+    <tr><td><code>/api/v1/jobs/&lt;uuid:id&gt;/applicants/</code></td><td>GET</td><td><code>ApplicantsPerJobView</code>: Returns candidate list ranked by ATS score.</td></tr>
+    <tr><td><code>/api/v1/jobs/&lt;uuid:id&gt;/applicants/download/</code></td><td>GET</td><td><code>BulkResumeDownloadView</code>: Generates and streams dynamic ZIP of all resumes.</td></tr>
+    <tr><td><code>/api/v1/interviews/</code></td><td>GET, POST</td><td><code>ScheduleInterviewView</code>: Schedules round (POST) or lists interviews (GET).</td></tr>
+    <tr><td><code>/api/v1/blockchain/generate/</code></td><td>POST</td><td><code>GenerateOfferView</code>: Chains SHA-256 hash and generates digital offer QR code.</td></tr>
+    <tr><td><code>/api/v1/ds/placement-probability/</code></td><td>GET</td><td><code>PlacementProbabilityView</code>: Computes ML probability of candidate selection.</td></tr>
+    <tr><td><code>/api/v1/ds/recommended-jobs/</code></td><td>GET</td><td><code>RecommendedJobsView</code>: Computes TF-IDF similarity recommendations for student.</td></tr>
+    <tr><td><code>/api/v1/learn/modules/</code></td><td>GET</td><td><code>LearnListView</code>: Lists curated video learning modules and resources.</td></tr>
+    <tr><td><code>/api/v1/learn/test/submit/</code></td><td>POST</td><td><code>TestSubmitView</code>: Evaluates MCQ responses and increments streaks/points.</td></tr>
+    <tr><td><code>/api/v1/analytics/overview/</code></td><td>GET</td><td><code>AnalyticsOverviewView</code>: Delivers cached placement metrics and KPI counters.</td></tr>
+    <tr><td><code>/api/v1/billing/checkout/</code></td><td>POST</td><td><code>CheckoutView</code>: Initiates Stripe checkout session for plan upgrade.</td></tr>
+  </tbody>
+</table>
+
+</body>
+</html>

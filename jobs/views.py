@@ -388,3 +388,24 @@ class UpdateApplicationStatusView(APIView):
         send_status_change_notification_task.delay(str(app.id), new_status)
 
         return Response(ApplicationSerializer(app).data)
+
+
+class ApplicationDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, app_id):
+        app = get_object_or_404(
+            Application.objects.select_related("job__company", "student__user"),
+            id=app_id,
+        )
+        if request.user.role == "STUDENT":
+            if app.student.user != request.user:
+                return Response({"error": "Forbidden"}, status=403)
+        elif request.user.role == "COMPANY":
+            if app.job.company.user != request.user:
+                return Response({"error": "Forbidden"}, status=403)
+        elif request.user.role not in ["ADMIN", "TPO"]:
+            return Response({"error": "Forbidden"}, status=403)
+
+        return Response(ApplicationSerializer(app).data)
+

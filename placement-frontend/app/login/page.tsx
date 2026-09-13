@@ -69,7 +69,13 @@ const LoginPage: React.FC = () => {
         setUserId((data as any).user_id ?? null);
         startResendCooldown();
         setLoading(false);
-        try { toast.success('OTP sent. Check your email.'); } catch {}
+        const devOtp = (data as any).dev_otp;
+        if (devOtp) {
+          setOtp(devOtp);
+          try { toast.info(`Dev Mode OTP: ${devOtp}`); } catch {}
+        } else {
+          try { toast.success('OTP sent. Check your email.'); } catch {}
+        }
         return;
       }
 
@@ -150,9 +156,15 @@ const LoginPage: React.FC = () => {
     setError(null);
     try {
       // Real endpoint + payload contract: POST /accounts/resend-otp/ { user_id, purpose }
-      await api.post('/accounts/resend-otp/', { user_id: userId, purpose: 'LOGIN' });
+      const res = await api.post('/accounts/resend-otp/', { user_id: userId, purpose: 'LOGIN' });
       startResendCooldown();
-      try { toast.success('OTP resent'); } catch {}
+      const devOtp = res.data?.dev_otp;
+      if (devOtp) {
+        setOtp(devOtp);
+        try { toast.info(`Dev Mode OTP: ${devOtp}`); } catch {}
+      } else {
+        try { toast.success('OTP resent'); } catch {}
+      }
     } catch (e) {
       setError('Unable to resend OTP.');
       try { toast.error('Unable to resend OTP.'); } catch {}

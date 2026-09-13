@@ -1,6 +1,7 @@
 import logging
 from datetime import timedelta
 
+from django.conf import settings
 from django.utils import timezone
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -52,7 +53,7 @@ class RegisterView(APIView):
         ser = RegisterSerializer(data=request.data)
         if ser.is_valid():
             user = ser.save()
-            send_otp_email(user, "REGISTER")
+            otp_obj = send_otp_email(user, "REGISTER")
             _safe_log(
                 "info",
                 "user_registered",
@@ -61,9 +62,10 @@ class RegisterView(APIView):
                 email=user.email,
                 role=user.role,
             )
-            return Response(
-                {"message": "OTP sent", "user_id": str(user.id)}, status=201
-            )
+            resp_data = {"message": "OTP sent", "user_id": str(user.id)}
+            if settings.DEBUG and otp_obj:
+                resp_data["dev_otp"] = otp_obj.otp
+            return Response(resp_data, status=201)
         return Response(ser.errors, status=400)
 
 
@@ -193,7 +195,7 @@ class LoginView(APIView):
 
         # MFA flow
         if getattr(user, "is_mfa_enabled", False):
-            send_otp_email(user, "LOGIN")
+            otp_obj = send_otp_email(user, "LOGIN")
             from .tasks import record_login_history_task
 
             record_login_history_task.delay(str(user.id), ip, device + " [MFA_PENDING]")
@@ -207,16 +209,16 @@ class LoginView(APIView):
                 ip=ip,
             )
             pending_flag = _pending_approval_flag(user)
-            return Response(
-                {
-                    "mfa_required": True,
-                    "message": "Password correct. OTP sent to email for 2FA",
-                    "user_id": str(user.id),
-                    "new_device_alert": new_device,
-                    "pending_approval": pending_flag,
-                },
-                status=200,
-            )
+            resp_data = {
+                "mfa_required": True,
+                "message": "Password correct. OTP sent to email for 2FA",
+                "user_id": str(user.id),
+                "new_device_alert": new_device,
+                "pending_approval": pending_flag,
+            }
+            if settings.DEBUG and otp_obj:
+                resp_data["dev_otp"] = otp_obj.otp
+            return Response(resp_data, status=200)
 
         # No MFA: finalize login
         user.failed_login_attempts = 0
@@ -364,8 +366,11 @@ class ResendOTPView(APIView):
             >= 5
         ):
             return Response({"error": "Rate limit: 5 OTPs/hour"}, status=429)
-        send_otp_email(user, purpose)
-        return Response({"message": "OTP resent"})
+        otp_obj = send_otp_email(user, purpose)
+        resp_data = {"message": "OTP resent"}
+        if settings.DEBUG and otp_obj:
+            resp_data["dev_otp"] = otp_obj.otp
+        return Response(resp_data)
 
 
 class DeleteMyAccountView(APIView):

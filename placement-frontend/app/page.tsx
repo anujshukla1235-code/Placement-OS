@@ -1,26 +1,39 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAccessToken, getStoredUserRole, getRoleBasedRedirectPath } from '@/lib/auth';
-import { Shield, GraduationCap, Building2, CheckCircle2 } from 'lucide-react';
+import { Shield, GraduationCap, Building2, CheckCircle2, Sparkles, Calendar, Lock, Cpu } from 'lucide-react';
+import api from '@/lib/api';
 
-const jobs = [
-  { role: 'Frontend Developer', company: 'Google', location: 'Remote', logo: 'G' },
-  { role: 'Software Engineer', company: 'Microsoft', location: 'Bengaluru', logo: 'M' },
-  { role: 'Product Manager', company: 'Amazon', location: 'Hyderabad', logo: 'A' },
-  { role: 'UI/UX Designer', company: 'Apple', location: 'Remote', logo: 'A' },
-];
+interface ActiveOpportunity {
+  id: string;
+  title: string;
+  company_name?: string;
+  location?: string;
+}
 
 export default function HomePage() {
   const router = useRouter();
+  const [activeJobs, setActiveJobs] = useState<ActiveOpportunity[]>([]);
 
   useEffect(() => {
     const token = getAccessToken();
     if (token) {
       router.replace(getRoleBasedRedirectPath(getStoredUserRole()));
+      return;
     }
+
+    api.get('/jobs/?limit=4').then((res) => {
+      const raw = res.data;
+      const list = Array.isArray(raw) ? raw : (raw.results || []);
+      if (list.length > 0) {
+        setActiveJobs(list);
+      }
+    }).catch(() => {
+      // unauthenticated or no jobs yet
+    });
   }, [router]);
 
   return (
@@ -109,26 +122,74 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Right Floating Card Overlay mimicking the UI */}
+        {/* Right Floating Card Overlay */}
         <div className="mt-12 lg:ml-12 lg:mt-0 lg:w-[380px] shrink-0">
           <div className="relative overflow-hidden rounded-3xl border border-white bg-white/70 p-6 shadow-2xl backdrop-blur-md">
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="font-semibold text-slate-900">Active Opportunities</h3>
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">4</span>
+              <h3 className="font-semibold text-slate-900">
+                {activeJobs.length > 0 ? 'Active Opportunities' : 'Platform Capabilities'}
+              </h3>
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
+                {activeJobs.length > 0 ? activeJobs.length : '4'}
+              </span>
             </div>
             
             <div className="space-y-4">
-              {jobs.map((job, idx) => (
-                <div key={idx} className="flex items-center gap-4 rounded-2xl bg-white p-3 shadow-sm transition hover:shadow-md border border-slate-100">
-                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-bold text-white shadow-inner ${idx === 0 ? 'bg-red-500' : idx === 1 ? 'bg-blue-600' : idx === 2 ? 'bg-orange-500' : 'bg-slate-800'}`}>
-                    {job.logo}
+              {activeJobs.length > 0 ? (
+                activeJobs.map((job) => (
+                  <div key={job.id} className="flex items-center gap-4 rounded-2xl bg-white p-3 shadow-sm transition hover:shadow-md border border-slate-100">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-bold text-white shadow-inner bg-indigo-600">
+                      {job.company_name ? job.company_name.charAt(0).toUpperCase() : 'J'}
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <h4 className="truncate font-semibold text-slate-900">{job.title}</h4>
+                      <p className="truncate text-xs font-medium text-slate-500">{job.company_name || 'Hiring Company'} • {job.location || 'Flexible'}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <h4 className="truncate font-semibold text-slate-900">{job.role}</h4>
-                    <p className="truncate text-xs font-medium text-slate-500">{job.company} • {job.location}</p>
+                ))
+              ) : (
+                <>
+                  <div className="flex items-center gap-4 rounded-2xl bg-white p-3 shadow-sm transition hover:shadow-md border border-slate-100">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-bold text-white shadow-inner bg-indigo-600">
+                      <Sparkles className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <h4 className="truncate font-semibold text-slate-900">AI ATS Scoring</h4>
+                      <p className="truncate text-xs font-medium text-slate-500">Automated match & feedback</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+
+                  <div className="flex items-center gap-4 rounded-2xl bg-white p-3 shadow-sm transition hover:shadow-md border border-slate-100">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-bold text-white shadow-inner bg-blue-600">
+                      <Calendar className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <h4 className="truncate font-semibold text-slate-900">Real-Time Interviews</h4>
+                      <p className="truncate text-xs font-medium text-slate-500">Slot tracking & reminders</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 rounded-2xl bg-white p-3 shadow-sm transition hover:shadow-md border border-slate-100">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-bold text-white shadow-inner bg-emerald-600">
+                      <Lock className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <h4 className="truncate font-semibold text-slate-900">Tenant Data Isolation</h4>
+                      <p className="truncate text-xs font-medium text-slate-500">Enterprise security & MFA</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 rounded-2xl bg-white p-3 shadow-sm transition hover:shadow-md border border-slate-100">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-bold text-white shadow-inner bg-purple-600">
+                      <Cpu className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <h4 className="truncate font-semibold text-slate-900">TPO Verification</h4>
+                      <p className="truncate text-xs font-medium text-slate-500">Official student marksheets</p>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

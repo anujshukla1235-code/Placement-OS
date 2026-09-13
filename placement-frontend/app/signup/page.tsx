@@ -109,10 +109,15 @@ export default function SignupPage() {
 
     try {
       const { data } = await api.post('/accounts/register/', payload);
-      toast.success('Registration successful! OTP sent to your email.');
       setUserId(data.user_id);
       setOtpStep(true);
       startResendCooldown();
+      if (data.dev_otp) {
+        setOtp(data.dev_otp);
+        toast.info(`Dev Mode OTP: ${data.dev_otp}`);
+      } else {
+        toast.success('Registration successful! OTP sent to your email.');
+      }
     } catch (err: any) {
       const axiosError = err as AxiosError<any>;
       const serverError = axiosError.response?.data;
@@ -133,14 +138,8 @@ export default function SignupPage() {
   };
 
   const verifyOtp = async () => {
-    if (!userId) {
-      toast.error('Session expired. Please sign up again.');
-      setOtpStep(false);
-      return;
-    }
-
+    if (!userId) return;
     setLoading(true);
-
     try {
       await api.post('/accounts/verify-otp/', {
         user_id: userId,
@@ -159,9 +158,14 @@ export default function SignupPage() {
   const resendOtp = async () => {
     if (!userId) return;
     try {
-      await api.post('/accounts/resend-otp/', { user_id: userId, purpose: 'REGISTER' });
+      const res = await api.post('/accounts/resend-otp/', { user_id: userId, purpose: 'REGISTER' });
       startResendCooldown();
-      toast.success('OTP resent successfully.');
+      if (res.data?.dev_otp) {
+        setOtp(res.data.dev_otp);
+        toast.info(`Dev Mode OTP: ${res.data.dev_otp}`);
+      } else {
+        toast.success('OTP resent successfully.');
+      }
     } catch (e) {
       toast.error('Unable to resend OTP.');
     }

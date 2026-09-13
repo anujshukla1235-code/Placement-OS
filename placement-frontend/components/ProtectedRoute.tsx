@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 import { getAccessToken, getStoredUserRole, getUserRoleFromToken, getRoleBasedRedirectPath, type UserRole } from '@/lib/auth';
 import api from '@/lib/api';
@@ -19,6 +19,7 @@ export function ProtectedRoute({
   fallbackPath = '/login',
 }: ProtectedRouteProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [pendingApproval, setPendingApproval] = useState(false);
 
@@ -30,7 +31,9 @@ export function ProtectedRoute({
     const token = getAccessToken();
 
     if (!token) {
-      router.replace(fallbackPath);
+      if (pathname !== fallbackPath) {
+        router.replace(fallbackPath);
+      }
       return;
     }
 
@@ -38,9 +41,10 @@ export function ProtectedRoute({
     const requiredRoles = Array.isArray(requiredRole) ? requiredRole : requiredRole ? [requiredRole] : [];
 
     if (requiredRoles.length > 0 && (!role || !requiredRoles.includes(role))) {
-      // If user is authenticated but doesn't match required role, redirect them to their dashboard
       const redirectTo = role ? getRoleBasedRedirectPath(role) : fallbackPath;
-      router.replace(redirectTo);
+      if (pathname !== redirectTo) {
+        router.replace(redirectTo);
+      }
       return;
     }
 
@@ -55,8 +59,13 @@ export function ProtectedRoute({
           const hasResume = Boolean(profile?.resume);
 
           if (!hasSkills || !hasResume) {
-            router.replace('/onboarding/student');
-            return;
+            if (pathname !== '/onboarding/student') {
+              router.replace('/onboarding/student');
+              return;
+            } else {
+              setIsAuthorized(true);
+              return;
+            }
           }
         }
 
@@ -68,8 +77,13 @@ export function ProtectedRoute({
             const hasName = Boolean(profile?.company_name);
 
             if (!hasName) {
-              router.replace('/onboarding/company');
-              return;
+              if (pathname !== '/onboarding/company') {
+                router.replace('/onboarding/company');
+                return;
+              } else {
+                setIsAuthorized(true);
+                return;
+              }
             }
 
             const isApproved = Boolean(profile?.is_approved);
@@ -79,8 +93,13 @@ export function ProtectedRoute({
               return;
             }
           } catch (e) {
-            router.replace('/onboarding/company');
-            return;
+            if (pathname !== '/onboarding/company') {
+              router.replace('/onboarding/company');
+              return;
+            } else {
+              setIsAuthorized(true);
+              return;
+            }
           }
         }
 
@@ -92,8 +111,13 @@ export function ProtectedRoute({
             const hasName = Boolean(profile?.college_name);
 
             if (!hasName) {
-              router.replace('/onboarding/college');
-              return;
+              if (pathname !== '/onboarding/college') {
+                router.replace('/onboarding/college');
+                return;
+              } else {
+                setIsAuthorized(true);
+                return;
+              }
             }
 
             const isApproved = Boolean(profile?.is_approved);
@@ -103,9 +127,13 @@ export function ProtectedRoute({
               return;
             }
           } catch (e) {
-            // Profile doesn't exist yet — treat as needing onboarding, same as company.
-            router.replace('/onboarding/college');
-            return;
+            if (pathname !== '/onboarding/college') {
+              router.replace('/onboarding/college');
+              return;
+            } else {
+              setIsAuthorized(true);
+              return;
+            }
           }
           setIsAuthorized(true);
           return;
@@ -115,21 +143,30 @@ export function ProtectedRoute({
       } catch (err) {
         // If profile endpoint fails, treat as incomplete and redirect to onboarding for non-admins
         if (role === 'student') {
-          router.replace('/onboarding/student');
-          return;
+          if (pathname !== '/onboarding/student') {
+            router.replace('/onboarding/student');
+            return;
+          }
         }
         if (role === 'company') {
-          router.replace('/onboarding/company');
-          return;
+          if (pathname !== '/onboarding/company') {
+            router.replace('/onboarding/company');
+            return;
+          }
         }
-
+        if (role === 'college') {
+          if (pathname !== '/onboarding/college') {
+            router.replace('/onboarding/college');
+            return;
+          }
+        }
         // Fallback to allow access (e.g., admin or unknown issue)
         setIsAuthorized(true);
       }
     };
 
     checkProfileAndAuthorize();
-  }, [fallbackPath, requiredRole, router]);
+  }, [fallbackPath, requiredRole, router, pathname]);
 
   if (!isAuthorized) {
     return null;

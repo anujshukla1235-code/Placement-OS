@@ -8,11 +8,13 @@ import api from '@/lib/api';
 import { toast } from 'sonner';
 
 interface Application {
-  id: number;
+  id: string | number;
   company_name: string;
-  role: string;
+  job_title?: string;
+  role?: string;
   status: string;
-  date_applied: string;
+  applied_at?: string;
+  date_applied?: string;
 }
 
 const JobApplicationsPage: React.FC = () => {
@@ -23,8 +25,10 @@ const JobApplicationsPage: React.FC = () => {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const response = await api.get<Application[]>('/students/applications/');
-        setApplications(response.data);
+        const response = await api.get('/jobs/my-applications/');
+        const raw = response.data;
+        const list: Application[] = Array.isArray(raw) ? raw : (raw.results || []);
+        setApplications(list);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Unknown error';
         setError(msg);
@@ -63,17 +67,30 @@ const JobApplicationsPage: React.FC = () => {
 
         <div className="grid grid-cols-1 gap-6">
           {applications.length === 0 ? (
-            <p>No applications found.</p>
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-600">
+              <p className="font-medium text-lg">No applications submitted yet.</p>
+              <p className="text-sm text-slate-500 mt-1">Explore active job drives and apply to start tracking your applications.</p>
+              <a href="/jobs" className="mt-4 inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+                Browse Jobs
+              </a>
+            </div>
           ) : (
-            applications.map((app) => (
-              <div key={app.id} className="bg-white p-6 rounded-lg shadow-md">
-                <h2 className="text-xl font-semibold mb-3">{app.role} at {app.company_name}</h2>
-                <p className="text-gray-700 mb-2">Status: {app.status}</p>
-                <p className="text-gray-700 mb-2">Date Applied: {new Date(app.date_applied).toLocaleDateString()}</p>
-                <a href={`/applications/${app.id}`} className="text-blue-500 hover:underline mr-4">View Details</a>
-                <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Withdraw Application</button>
-              </div>
-            ))
+            applications.map((app) => {
+              const roleTitle = app.job_title || app.role || 'Job Application';
+              const dateVal = app.applied_at || app.date_applied;
+              const formattedDate = dateVal ? new Date(dateVal).toLocaleDateString() : 'Recently';
+
+              return (
+                <div key={app.id} className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                  <h2 className="text-xl font-semibold mb-2 text-slate-900">{roleTitle} at {app.company_name}</h2>
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+                    <p><span className="font-semibold text-slate-700">Status:</span> <span className="rounded bg-indigo-50 px-2.5 py-1 font-bold text-indigo-700">{app.status}</span></p>
+                    <p><span className="font-semibold text-slate-700">Date Applied:</span> {formattedDate}</p>
+                  </div>
+                  <a href={`/applications/${app.id}`} className="text-indigo-600 font-semibold hover:underline mr-4 text-sm">View Details</a>
+                </div>
+              );
+            })
           )}
         </div>
       </div>

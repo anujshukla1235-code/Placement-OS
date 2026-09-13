@@ -52,12 +52,16 @@ class ScheduleInterviewView(APIView):
             )
         else:
             interviews = Interview.objects.all()  # ADMIN only
-        interviews = interviews.select_related("application")
+        interviews = interviews.select_related("application__job__company")
         data = [
             {
                 "id": str(i.id),
                 "application_id": str(i.application.id),
-                "scheduled_at": i.scheduled_at,
+                "company_name": getattr(i.application.job.company, "company_name", "Company") if hasattr(i.application, "job") and hasattr(i.application.job, "company") and i.application.job.company else "Company",
+                "role": getattr(i.application.job, "title", "Job Role") if hasattr(i.application, "job") and i.application.job else "Job Role",
+                "date": i.scheduled_at.strftime("%Y-%m-%d") if i.scheduled_at else "",
+                "time": i.scheduled_at.strftime("%I:%M %p") if i.scheduled_at else "",
+                "scheduled_at": i.scheduled_at.isoformat() if i.scheduled_at else None,
                 "mode": i.mode,
                 "status": i.status,
             }
